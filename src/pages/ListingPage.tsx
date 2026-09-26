@@ -20,7 +20,7 @@ function Detail({ initialListing }: { initialListing: Listing }) {
 }
 
 export default function ListingPage() {
-	const listing = useLoaderData() as Listing;
+	const listing = useLoaderData<Listing>();
 	const location = useLocation();
 	return (
 		<div className="detail-page">
