@@ -1,49 +1,10 @@
 import { randomUUID } from "crypto";
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 import cors from "cors";
 import express, { type Request, type Response } from "express";
+import { appendListing, getListingById, getListings } from "./store";
 
 const PORT = 3001;
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// ============================================================
-// Types
-// ============================================================
-
-type Category = "tractor" | "combine" | "implement" | "attachment";
-type Status = "active" | "closed" | "pending";
-
-interface Listing {
-	id: string;
-	title: string;
-	description: string;
-	category: Category;
-	startingPrice: number;
-	currentBid: number;
-	currentBidder: string | null;
-	status: Status;
-	endsAt: string;
-	imageUrl: string;
-}
-
-interface BidRequest {
-	bidder: string;
-	amount: number;
-}
-
-interface CreateListingRequest {
-	title: string;
-}
-
-// ============================================================
-// In-memory store — seeded from data/listings.json
-// ============================================================
-
-const listings: Listing[] = JSON.parse(
-	readFileSync(join(__dirname, "data", "listings.json"), "utf-8"),
-);
 
 // ============================================================
 // App
@@ -56,7 +17,7 @@ app.use(express.json());
 
 // GET /api/listings
 app.get("/api/listings", (_req: Request, res: Response) => {
-	res.json(listings);
+	res.json(getListings());
 });
 
 // POST /api/listings
@@ -80,13 +41,14 @@ app.post("/api/listings", (req: Request, res: Response) => {
 		imageUrl: "",
 	};
 
-	listings.push(listing);
+	appendListing(listing);
+
 	return res.status(201).json(listing);
 });
 
 // GET /api/listings/:id
 app.get("/api/listings/:id", (req: Request, res: Response) => {
-	const listing = listings.find((l) => l.id === req.params.id);
+	const listing = getListingById(req.params.id);
 	if (!listing) {
 		return res.status(404).json({ error: "Listing not found" });
 	}
@@ -95,7 +57,7 @@ app.get("/api/listings/:id", (req: Request, res: Response) => {
 
 // POST /api/listings/:id/bids
 app.post("/api/listings/:id/bids", (req: Request, res: Response) => {
-	const listing = listings.find((l) => l.id === req.params.id);
+	const listing = getListingById(req.params.id);
 	if (!listing) {
 		return res.status(404).json({ error: "Listing not found" });
 	}
@@ -116,13 +78,16 @@ app.post("/api/listings/:id/bids", (req: Request, res: Response) => {
 		return res.status(400).json({ error: "Bidder name is required" });
 	}
 
+	console.log(typeof bid.amount, bid.amount);
+
 	if (typeof bid.amount !== "number" || isNaN(bid.amount) || bid.amount <= 0) {
 		return res
 			.status(400)
 			.json({ error: "Bid amount must be a positive number" });
 	}
 
-	if (bid.amount >= listing.currentBid) {
+	// Mark 1: bug in bidding, less than or equal to current bid should not be allowed instead of gt or equal to
+	if (bid.amount <= listing.currentBid) {
 		return res.status(400).json({
 			error: `Bid must be greater than the current bid of $${listing.currentBid.toLocaleString()}`,
 		});
@@ -133,6 +98,13 @@ app.post("/api/listings/:id/bids", (req: Request, res: Response) => {
 
 	return res.status(201).json(listing);
 });
+
+app.post('/api/listings/:id/bids', (req: Request, res: Response) => {
+	const listing = getListingById(req.params.id);
+	if (!listing) {
+		return res.status(404).json({ error: "Listing not found" });
+	}
+})
 
 app.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);
