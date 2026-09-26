@@ -20,7 +20,7 @@ bidsRouter.post("/", (req: Request, res: Response) => {
 			.json({ error: "This listing is not currently active" });
 	}
 
-	const bid = req.body as BidRequest;
+	const bid: BidRequest = req.body;
 
 	if (
 		!bid.bidder ||

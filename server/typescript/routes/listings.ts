@@ -10,7 +10,7 @@ listingsRouter.get("/", (_req: Request, res: Response) => {
 });
 
 listingsRouter.post("/", (req: Request, res: Response) => {
-	const { title } = req.body as CreateListingRequest;
+	const { title }: CreateListingRequest = req.body;
 
 	if (!title || typeof title !== "string" || title.trim() === "") {
 		return res.status(400).json({ error: "Title is required" });
