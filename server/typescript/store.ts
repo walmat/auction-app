@@ -1,8 +1,9 @@
-import type { Bid, Listing } from "../../shared/types";
 import { randomUUID } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import type { ListingsQuery } from "../../shared/listings";
+import type { Bid, Listing, ListingsResponse } from "../../shared/types";
 
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), "data");
 const listingsPath = join(dataDir, "listings.json");
@@ -49,8 +50,38 @@ const withCurrentBid = (listing: Listing): Listing => {
 		: listing;
 };
 
-export const getListings = (): Listing[] => {
-	return readListings().map(withCurrentBid);
+export const getListings = (query: ListingsQuery): ListingsResponse => {
+	const search = query.q.toLowerCase();
+	let listings = readListings().filter(
+		(listing) =>
+			(!search || listing.title.toLowerCase().includes(search)) &&
+			(query.category.length === 0 ||
+				query.category.includes(listing.category)) &&
+			(query.status.length === 0 || query.status.includes(listing.status)),
+	);
+	const sortByBid = query.sort !== "ending-soonest";
+	if (sortByBid) listings = listings.map(withCurrentBid);
+	listings.sort((a, b) => {
+		const difference =
+			query.sort === "bid-lowest"
+				? a.currentBid - b.currentBid
+				: query.sort === "bid-highest"
+					? b.currentBid - a.currentBid
+					: Date.parse(a.endsAt) - Date.parse(b.endsAt);
+		return difference || a.id.localeCompare(b.id);
+	});
+	const total = listings.length;
+	const totalPages = Math.ceil(total / query.pageSize);
+	const start = (query.page - 1) * query.pageSize;
+	const page = listings.slice(start, start + query.pageSize);
+	return {
+		listings: sortByBid ? page : page.map(withCurrentBid),
+		page: query.page,
+		pageSize: query.pageSize,
+		total,
+		totalPages,
+		hasNextPage: query.page < totalPages,
+	};
 };
 
 export const appendListing = (listing: Listing): void => {

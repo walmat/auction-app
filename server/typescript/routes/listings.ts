@@ -1,12 +1,23 @@
-import type { CreateListingRequest, Listing } from "../../../shared/types";
 import { randomUUID } from "crypto";
-import { Router, type Request, type Response } from "express";
+import { type Request, type Response, Router } from "express";
+import { parseListingsQuery } from "../../../shared/listings";
+import type { CreateListingRequest, Listing } from "../../../shared/types";
 import { appendListing, getListingById, getListings } from "../store";
 
 export const listingsRouter = Router();
 
-listingsRouter.get("/", (_req: Request, res: Response) => {
-	res.json(getListings());
+listingsRouter.get("/", (req: Request, res: Response) => {
+	let query: ReturnType<typeof parseListingsQuery>;
+	try {
+		query = parseListingsQuery(
+			new URL(req.originalUrl, "http://localhost").searchParams,
+		);
+	} catch (error) {
+		return res.status(400).json({
+			error: error instanceof Error ? error.message : "Invalid query",
+		});
+	}
+	return res.json(getListings(query));
 });
 
 listingsRouter.post("/", (req: Request, res: Response) => {

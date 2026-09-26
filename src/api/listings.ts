@@ -3,17 +3,32 @@ import type {
 	BidRequest,
 	CreateListingRequest,
 	Listing,
+	ListingsResponse,
 } from "../../shared/types";
 
-export async function getListings(): Promise<Listing[]> {
-	const res = await fetch("/api/listings");
-	if (!res.ok) throw new Error("Failed to fetch listings");
+export async function getListings(
+	params: URLSearchParams,
+	signal?: AbortSignal,
+): Promise<ListingsResponse> {
+	const res = await fetch(`/api/listings?${params}`, { signal });
+	if (!res.ok) {
+		const data = await res.json().catch(() => ({}));
+		throw new Error(data.error || "Failed to fetch listings");
+	}
 	return res.json();
 }
 
-export async function getListing(id: string): Promise<Listing> {
-	const res = await fetch(`/api/listings/${id}`);
-	if (!res.ok) throw new Error("Failed to fetch listing");
+export async function getListing(
+	id: string,
+	signal?: AbortSignal,
+): Promise<Listing> {
+	const res = await fetch(`/api/listings/${encodeURIComponent(id)}`, {
+		signal,
+	});
+	if (!res.ok)
+		throw new Error(
+			res.status === 404 ? "Listing not found" : "Failed to fetch listing",
+		);
 	return res.json();
 }
 

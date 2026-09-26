@@ -2,8 +2,8 @@ import type { BidHistoryResponse, BidRequest } from "../../../shared/types";
 import { randomUUID } from "crypto";
 import { Router, type Request, type Response } from "express";
 import { getBids, getListingById, recordBid } from "../store";
+import { NUMERICAL_REGEX } from "../../../shared/regex";
 
-const NUMERICAL_REGEX = /^\d+$/;
 const MAX_LIMIT = 50;
 
 export const bidsRouter = Router({ mergeParams: true });

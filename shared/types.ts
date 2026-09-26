@@ -34,3 +34,12 @@ export interface BidHistoryResponse {
 	bids: Bid[];
 	nextCursor: string | null;
 }
+
+export interface ListingsResponse {
+	listings: Listing[];
+	page: number;
+	pageSize: number;
+	total: number;
+	totalPages: number;
+	hasNextPage: boolean;
+}

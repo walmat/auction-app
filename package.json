@@ -12,8 +12,10 @@
 		"format": "biome format --write ."
 	},
 	"dependencies": {
+		"@radix-ui/react-popover": "^1.1.23",
 		"react": "^19.2.0",
-		"react-dom": "^19.2.0"
+		"react-dom": "^19.2.0",
+		"react-router-dom": "^7.18.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.6",
