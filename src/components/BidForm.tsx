@@ -12,10 +12,12 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 	const [submitting, setSubmitting] = useState(false);
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+		// Mark 2: bug in bidding, need to store the ref to currentTarget since the event will be reused and cleared after the async call
+		const target = e.currentTarget;
 		e.preventDefault();
 		setError(null);
 
-		const data = new FormData(e.currentTarget);
+		const data = new FormData(target);
 		const bidder = (data.get("bidder") as string).trim();
 		const numAmount = parseFloat(data.get("amount") as string);
 
@@ -32,7 +34,7 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 		try {
 			const updated = await placeBid(listing.id, bidder, numAmount);
 			onBidSuccess(updated);
-			e.currentTarget.reset();
+			target.reset();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to place bid");
 		} finally {

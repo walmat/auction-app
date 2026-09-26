@@ -11,10 +11,12 @@ export default function CreateListingForm({ onSuccess }: Props) {
 	const [submitting, setSubmitting] = useState(false);
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+		// Mark 2: bug in listing creation as well, need to store the ref to currentTarget since the event will be reused and cleared after the async call
+		const target = e.currentTarget;
 		e.preventDefault();
 		setError(null);
 
-		const data = new FormData(e.currentTarget);
+		const data = new FormData(target);
 		const title = (data.get("title") as string).trim();
 
 		if (!title) {
@@ -26,7 +28,7 @@ export default function CreateListingForm({ onSuccess }: Props) {
 		try {
 			const listing = await createListing({ title });
 			onSuccess(listing);
-			e.currentTarget.reset();
+			target.reset();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to create listing");
 		} finally {
