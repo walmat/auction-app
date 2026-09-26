@@ -1,6 +1,6 @@
+import type { Listing } from "../../shared/types";
 import BidForm from "./BidForm";
 import BidHistory from "./BidHistory";
-import type { Listing } from "../../shared/types";
 
 interface Props {
 	listing: Listing;
@@ -20,11 +20,13 @@ function formatDate(iso: string): string {
 export default function ListingDetail({ listing, onBidSuccess }: Props) {
 	return (
 		<div className="listing-detail">
-			<img
-				src={listing.imageUrl}
-				alt={listing.title}
-				className="listing-detail__image"
-			/>
+			{listing.imageUrl && (
+				<img
+					src={listing.imageUrl}
+					alt={listing.title}
+					className="listing-detail__image"
+				/>
+			)}
 			<div className="listing-detail__header">
 				<span className={`badge badge--${listing.category}`}>
 					{listing.category}
@@ -33,7 +35,7 @@ export default function ListingDetail({ listing, onBidSuccess }: Props) {
 					{listing.status}
 				</span>
 			</div>
-			<h2 className="listing-detail__title">{listing.title}</h2>
+			<h1 className="listing-detail__title">{listing.title}</h1>
 			<p className="listing-detail__description">{listing.description}</p>
 
 			<div className="listing-detail__meta">

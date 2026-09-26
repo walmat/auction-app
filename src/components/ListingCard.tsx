@@ -1,9 +1,8 @@
+import { Link, useLocation } from "react-router-dom";
 import type { Listing } from "../../shared/types";
 
 interface Props {
 	listing: Listing;
-	isSelected: boolean;
-	onClick: () => void;
 }
 
 function timeRemaining(endsAt: string, status: string): string {
@@ -17,22 +16,26 @@ function timeRemaining(endsAt: string, status: string): string {
 	return "Less than an hour left";
 }
 
-export default function ListingCard({ listing, isSelected, onClick }: Props) {
+export default function ListingCard({ listing }: Props) {
+	const location = useLocation();
 	const closed = listing.status === "closed";
 
 	return (
-		<div
-			className={`listing-card ${isSelected ? "listing-card--selected" : ""} ${closed ? "listing-card--closed" : ""}`}
-			onClick={onClick}
-			role="button"
-			tabIndex={0}
-			onKeyDown={(e) => e.key === "Enter" && onClick()}
+		<Link
+			to={`/listings/${listing.id}`}
+			state={{ from: location.pathname + location.search }}
+			className={`listing-card ${closed ? "listing-card--closed" : ""}`}
 		>
-			<img
-				src={listing.imageUrl}
-				alt={listing.title}
-				className="listing-card__image"
-			/>
+			{listing.imageUrl ? (
+				<img
+					src={listing.imageUrl || undefined}
+					loading="lazy"
+					alt={listing.title}
+					className="listing-card__image"
+				/>
+			) : (
+				<div className="listing-card__placeholder">No photo</div>
+			)}
 			<div className="listing-card__body">
 				<span className={`badge badge--${listing.category}`}>
 					{listing.category}
@@ -47,6 +50,6 @@ export default function ListingCard({ listing, isSelected, onClick }: Props) {
 					{timeRemaining(listing.endsAt, listing.status)}
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }
