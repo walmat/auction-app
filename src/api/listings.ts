@@ -1,4 +1,9 @@
-import type { Listing } from "../types";
+import type {
+	BidHistoryResponse,
+	BidRequest,
+	CreateListingRequest,
+	Listing,
+} from "../../shared/types";
 
 export async function getListings(): Promise<Listing[]> {
 	const res = await fetch("/api/listings");
@@ -12,7 +17,9 @@ export async function getListing(id: string): Promise<Listing> {
 	return res.json();
 }
 
-export async function createListing(data: { title: string }): Promise<Listing> {
+export async function createListing(
+	data: CreateListingRequest,
+): Promise<Listing> {
 	const res = await fetch("/api/listings", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -30,14 +37,33 @@ export async function placeBid(
 	bidder: string,
 	amount: number,
 ): Promise<Listing> {
+	const bid: BidRequest = { bidder, amount };
 	const res = await fetch(`/api/listings/${listingId}/bids`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ bidder, amount }),
+		body: JSON.stringify(bid),
 	});
 	if (!res.ok) {
 		const data = await res.json().catch(() => ({}));
 		throw new Error(data.error || data.detail || "Failed to place bid");
+	}
+	return res.json();
+}
+
+export async function getBidHistory(
+	listingId: string,
+	before: string | null,
+	signal: AbortSignal,
+): Promise<BidHistoryResponse> {
+	const query = new URLSearchParams({ limit: "10" });
+	if (before !== null) query.set("before", before);
+	const res = await fetch(
+		`/api/listings/${encodeURIComponent(listingId)}/bids?${query}`,
+		{ signal },
+	);
+	if (!res.ok) {
+		const data = await res.json().catch(() => ({}));
+		throw new Error(data.error || "Failed to load bid history");
 	}
 	return res.json();
 }

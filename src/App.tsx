@@ -3,7 +3,7 @@ import { getListings } from "./api/listings";
 import CreateListingForm from "./components/CreateListingForm";
 import ListingCard from "./components/ListingCard";
 import ListingDetail from "./components/ListingDetail";
-import type { Listing } from "./types";
+import type { Listing } from "../shared/types";
 
 export default function App() {
 	const [listings, setListings] = useState<Listing[]>([]);

@@ -1,5 +1,6 @@
 import BidForm from "./BidForm";
-import type { Listing } from "../types";
+import BidHistory from "./BidHistory";
+import type { Listing } from "../../shared/types";
 
 interface Props {
 	listing: Listing;
@@ -63,6 +64,10 @@ export default function ListingDetail({ listing, onBidSuccess }: Props) {
 			{listing.status === "active" && (
 				<BidForm listing={listing} onBidSuccess={onBidSuccess} />
 			)}
+			<BidHistory
+				key={`${listing.id}:${listing.currentBid}`}
+				listingId={listing.id}
+			/>
 		</div>
 	);
 }

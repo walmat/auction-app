@@ -11,11 +11,7 @@
 
 body {
 	font-family:
-		-apple-system,
-		BlinkMacSystemFont,
-		"Segoe UI",
-		Roboto,
-		sans-serif;
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	background: #f5f5f5;
 	color: #1a1a1a;
 	min-height: 100vh;
@@ -101,7 +97,9 @@ body {
 	border-radius: 5px;
 	padding: 3px 10px;
 	cursor: pointer;
-	transition: background 0.15s, color 0.15s;
+	transition:
+		background 0.15s,
+		color 0.15s;
 }
 
 .panel__heading-action:hover {
@@ -415,4 +413,88 @@ body {
 	height: 100%;
 	color: #aaa;
 	font-size: 1rem;
+}
+
+.bid-history {
+	margin-top: 24px;
+	padding: 20px;
+	border: 1px solid #e5e5e5;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.bid-history h3 {
+	font-size: 1rem;
+}
+
+.bid-history__subtitle,
+.bid-history__bidder time {
+	font-size: 0.8rem;
+	color: #555;
+}
+
+.bid-history__subtitle {
+	margin-top: 4px;
+	margin-bottom: 12px;
+}
+
+.bid-history__list {
+	list-style: none;
+}
+
+.bid-history__row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	padding: 12px 0;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.bid-history__bidder {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.bid-history__row strong {
+	color: #0d3d52;
+	font-variant-numeric: tabular-nums;
+}
+
+.bid-history__message {
+	padding: 16px 0;
+}
+
+.bid-history__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 16px;
+	font-size: 0.85rem;
+}
+
+.bid-history button {
+	padding: 8px 12px;
+	border: 1px solid #0d3d52;
+	border-radius: 6px;
+	background: #fff;
+	color: #0d3d52;
+	font: inherit;
+	cursor: pointer;
+}
+
+.bid-history button:disabled {
+	border-color: #ddd;
+	color: #666;
+	cursor: not-allowed;
+}
+
+.bid-history button:focus-visible {
+	outline: 2px solid #0d3d52;
+	outline-offset: 3px;
 }
