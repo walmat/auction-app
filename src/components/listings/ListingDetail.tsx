@@ -1,6 +1,8 @@
 import type { Listing } from "../../../shared/types";
+import { useAuctionStatus } from "../../hooks/useAuctionStatus";
 import BidForm from "../bids/BidForm";
 import BidHistory from "../bids/BidHistory";
+import AuctionCountdown from "./AuctionCountdown";
 
 interface Props {
 	listing: Listing;
@@ -18,6 +20,7 @@ function formatDate(iso: string): string {
 }
 
 export default function ListingDetail({ listing, onBidSuccess }: Props) {
+	const status = useAuctionStatus(listing);
 	return (
 		<div className="listing-detail">
 			{listing.imageUrl && (
@@ -31,9 +34,7 @@ export default function ListingDetail({ listing, onBidSuccess }: Props) {
 				<span className={`badge badge--${listing.category}`}>
 					{listing.category}
 				</span>
-				<span className={`status-badge status-badge--${listing.status}`}>
-					{listing.status}
-				</span>
+				<span className={`status-badge status-badge--${status}`}>{status}</span>
 			</div>
 			<h1 className="listing-detail__title">{listing.title}</h1>
 			<p className="listing-detail__description">{listing.description}</p>
@@ -61,14 +62,27 @@ export default function ListingDetail({ listing, onBidSuccess }: Props) {
 					<span className="meta-label">Auction Ends</span>
 					<span className="meta-value">{formatDate(listing.endsAt)}</span>
 				</div>
+				<div className="meta-row">
+					<span className="meta-label">Time remaining</span>
+					<span className="meta-value">
+						{status === "closed" ? (
+							"Auction ended"
+						) : status === "pending" ? (
+							"Auction pending"
+						) : (
+							<AuctionCountdown endsAt={listing.endsAt} />
+						)}
+					</span>
+				</div>
 			</div>
 
-			{listing.status === "active" && (
+			{status === "active" && (
 				<BidForm listing={listing} onBidSuccess={onBidSuccess} />
 			)}
 			<BidHistory
 				key={`${listing.id}:${listing.currentBid}`}
 				listingId={listing.id}
+				closed={status === "closed"}
 			/>
 		</div>
 	);

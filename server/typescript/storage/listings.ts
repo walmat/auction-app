@@ -1,9 +1,16 @@
-import { randomUUID } from "crypto";
-import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { dataDirectory } from "./paths";
+import { randomUUID } from "node:crypto";
+import {
+	mkdirSync,
+	readFileSync,
+	renameSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
+import { auctionStatus } from "../../../shared/auction";
 import type { ListingsQuery } from "../../../shared/listings";
 import type { Bid, Listing, ListingsResponse } from "../../../shared/types";
+import { dataDirectory } from "./paths";
 
 const listingsPath = join(dataDirectory, "listings.json");
 const bidsDir = join(dataDirectory, "bids");
@@ -20,7 +27,10 @@ const writeJson = (path: string, value: unknown): void => {
 };
 
 const readListings = (): Listing[] => {
-	return JSON.parse(readFileSync(listingsPath, "utf-8"));
+	const now = Date.now();
+	return JSON.parse(readFileSync(listingsPath, "utf-8")).map(
+		(listing: Listing) => ({ ...listing, status: auctionStatus(listing, now) }),
+	);
 };
 
 const readBids = (listingId: string): Bid[] => {
@@ -106,3 +116,6 @@ export const recordBid = (listingId: string, bid: Bid): Listing => {
 	writeJson(join(bidsDir, `${listingId}.json`), [...readBids(listingId), bid]);
 	return { ...listing, currentBid: bid.amount, currentBidder: bid.bidderName };
 };
+
+export const getListingStatuses = () =>
+	readListings().map(({ id, status }) => ({ id, status }));

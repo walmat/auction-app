@@ -1,8 +1,9 @@
-import type { BidHistoryResponse, BidRequest } from "../../../shared/types";
-import { randomUUID } from "crypto";
-import { Router, type Request, type Response } from "express";
-import { getBids, getListingById, recordBid } from "../storage/listings";
+import { randomUUID } from "node:crypto";
+import { type Request, type Response, Router } from "express";
 import { NUMERICAL_REGEX } from "../../../shared/regex";
+import type { BidHistoryResponse, BidRequest } from "../../../shared/types";
+import { notifyListingsChanged } from "../events";
+import { getBids, getListingById, recordBid } from "../storage/listings";
 
 const MAX_LIMIT = 50;
 
@@ -20,7 +21,7 @@ bidsRouter.post("/", (req: Request, res: Response) => {
 			.json({ error: "This listing is not currently active" });
 	}
 
-	const bid: BidRequest = req.body;
+	const bid: Partial<BidRequest> = req.body ?? {};
 
 	if (
 		!bid.bidder ||
@@ -53,6 +54,7 @@ bidsRouter.post("/", (req: Request, res: Response) => {
 		createdAt: new Date().toISOString(),
 	});
 
+	notifyListingsChanged();
 	return res.status(201).json(updatedListing);
 });
 
@@ -69,9 +71,9 @@ bidsRouter.get("/", (req: Request, res: Response) => {
 		Number(requestedLimit) > MAX_LIMIT ||
 		(before !== undefined && (typeof before !== "string" || before === ""))
 	) {
-		return res
-			.status(400)
-			.json({ error: `Use a limit from 1 to ${MAX_LIMIT} and a valid bid cursor` });
+		return res.status(400).json({
+			error: `Use a limit from 1 to ${MAX_LIMIT} and a valid bid cursor`,
+		});
 	}
 
 	const bids = getBids(req.params.id);

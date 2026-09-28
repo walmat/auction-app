@@ -9,6 +9,7 @@ export interface Listing {
 	startingPrice: number;
 	currentBid: number;
 	currentBidder: string | null;
+	// The server also derives closed status from endsAt.
 	status: Status;
 	endsAt: string;
 	imageUrl: string;

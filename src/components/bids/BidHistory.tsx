@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import type { BidHistoryResponse } from "../../../shared/types";
-import { getBidHistory } from "../../api/listings";
+import { useBidHistory } from "../../hooks/useBidHistory";
 
 interface Props {
 	listingId: string;
+	closed?: boolean;
 }
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -15,39 +14,12 @@ const dateTime = new Intl.DateTimeFormat(undefined, {
 	timeStyle: "medium",
 });
 
-export default function BidHistory({ listingId }: Props) {
-	const [cursors, setCursors] = useState<(string | null)[]>([null]);
-	const [page, setPage] = useState<BidHistoryResponse | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const [attempt, setAttempt] = useState(0);
-	const before = cursors[cursors.length - 1];
-	const loading = page === null && error === null;
-
-	useEffect(() => {
-		const controller = new AbortController();
-		getBidHistory(listingId, before, controller.signal)
-			.then((data) => {
-				if (!controller.signal.aborted) setPage(data);
-			})
-			.catch((err: unknown) => {
-				if (!controller.signal.aborted) {
-					setError(
-						err instanceof Error ? err.message : "Failed to load bid history",
-					);
-				}
-			});
-		return () => controller.abort();
-	}, [listingId, before, attempt]);
-
-	const navigate = (next: (string | null)[]) => {
-		setPage(null);
-		setError(null);
-		setCursors(next);
-	};
-
+export default function BidHistory({ listingId, closed = false }: Props) {
+	const { cursors, page, error, loading, navigate, retry } =
+		useBidHistory(listingId);
 	return (
 		<section className="bid-history" aria-labelledby="bid-history-title">
-			<h3 id="bid-history-title">Bid history</h3>
+			<h2 id="bid-history-title">Bid history</h2>
 			<p className="bid-history__subtitle">Newest bids first</p>
 			<div aria-busy={loading}>
 				{loading && (
@@ -58,19 +30,20 @@ export default function BidHistory({ listingId }: Props) {
 				{error && (
 					<div className="bid-history__message">
 						<p role="alert">{error}</p>
-						<button
-							type="button"
-							onClick={() => {
-								setError(null);
-								setAttempt((value) => value + 1);
-							}}
-						>
+						<button type="button" onClick={retry}>
 							Try again
 						</button>
 					</div>
 				)}
 				{page && page.bids.length === 0 && (
-					<p className="bid-history__message">No bids yet.</p>
+					<div className="bid-history__empty">
+						<strong>{closed ? "No bids were placed" : "No bids yet"}</strong>
+						<p>
+							{closed
+								? "This auction closed without any bidding activity."
+								: "Accepted bids will appear here, newest first."}
+						</p>
+					</div>
 				)}
 				{page && page.bids.length > 0 && (
 					<ol className="bid-history__list" aria-label="Bids, newest first">
@@ -88,25 +61,27 @@ export default function BidHistory({ listingId }: Props) {
 					</ol>
 				)}
 			</div>
-			<nav className="bid-history__pagination" aria-label="Bid history pages">
-				<button
-					type="button"
-					disabled={loading || cursors.length === 1}
-					onClick={() => navigate(cursors.slice(0, -1))}
-				>
-					Newer
-				</button>
-				<span role="status">Page {cursors.length}</span>
-				<button
-					type="button"
-					disabled={loading || !page?.nextCursor}
-					onClick={() => {
-						if (page?.nextCursor) navigate([...cursors, page.nextCursor]);
-					}}
-				>
-					Older
-				</button>
-			</nav>
+			{(cursors.length > 1 || page?.nextCursor) && (
+				<nav className="bid-history__pagination" aria-label="Bid history pages">
+					<button
+						type="button"
+						disabled={loading || cursors.length === 1}
+						onClick={() => navigate(cursors.slice(0, -1))}
+					>
+						Newer
+					</button>
+					<span role="status">Page {cursors.length}</span>
+					<button
+						type="button"
+						disabled={loading || !page?.nextCursor}
+						onClick={() => {
+							if (page?.nextCursor) navigate([...cursors, page.nextCursor]);
+						}}
+					>
+						Older
+					</button>
+				</nav>
+			)}
 		</section>
 	);
 }

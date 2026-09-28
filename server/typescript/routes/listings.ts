@@ -2,7 +2,12 @@ import { randomUUID } from "crypto";
 import { type Request, type Response, Router } from "express";
 import { parseListingsQuery } from "../../../shared/listings";
 import type { CreateListingRequest, Listing } from "../../../shared/types";
-import { appendListing, getListingById, getListings } from "../storage/listings";
+import { notifyListingsChanged } from "../events";
+import {
+	appendListing,
+	getListingById,
+	getListings,
+} from "../storage/listings";
 
 export const listingsRouter = Router();
 
@@ -41,6 +46,7 @@ listingsRouter.post("/", (req: Request, res: Response) => {
 	};
 
 	appendListing(listing);
+	notifyListingsChanged();
 
 	return res.status(201).json(listing);
 });

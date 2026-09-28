@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import CreateListingForm from "../components/create-listing/CreateListingForm";
-import { returnToListings } from "./ListingPage";
+import { returnToListings } from "../navigation";
 
 export default function NewListingPage() {
 	const location = useLocation();

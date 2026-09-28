@@ -7,6 +7,8 @@ import {
 	useNavigation,
 } from "react-router-dom";
 
+import LiveConnection from "./components/layout/LiveConnection";
+
 export default function App() {
 	const location = useLocation();
 	const navigation = useNavigation();
@@ -37,6 +39,7 @@ export default function App() {
 						? "Loading…"
 						: ""}
 				</div>
+				<LiveConnection />
 				<Outlet />
 			</main>
 			<ScrollRestoration

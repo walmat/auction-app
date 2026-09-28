@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { placeBid } from "../../api/listings";
+import { auctionStatus } from "../../../shared/auction";
 import type { Listing } from "../../../shared/types";
+import { placeBid } from "../../api/listings";
 
 interface Props {
 	listing: Listing;
@@ -12,10 +13,15 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 	const [submitting, setSubmitting] = useState(false);
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-		// Mark 2: bug in bidding, need to store the ref to currentTarget since the event will be reused and cleared after the async call
+		// currentTarget is only available during the synchronous event handler.
 		const target = e.currentTarget;
 		e.preventDefault();
 		setError(null);
+		if (submitting) return;
+		if (auctionStatus(listing) !== "active") {
+			setError("This auction is not open for bidding.");
+			return;
+		}
 
 		const data = new FormData(target);
 		const bidder = (data.get("bidder") as string).trim();
@@ -25,11 +31,15 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 			setError("Bidder name is required.");
 			return;
 		}
-		if (isNaN(numAmount) || numAmount <= 0) {
+		if (!Number.isFinite(numAmount) || numAmount <= 0) {
 			setError("Please enter a valid bid amount.");
 			return;
 		}
 
+		if (numAmount <= listing.currentBid) {
+			setError("Your bid must exceed the current bid.");
+			return;
+		}
 		setSubmitting(true);
 		try {
 			const updated = await placeBid(listing.id, bidder, numAmount);
@@ -44,8 +54,12 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 
 	return (
 		<form className="bid-form" onSubmit={handleSubmit}>
-			<h4 className="bid-form__title">Place a Bid</h4>
-			{error && <div className="bid-form__error">{error}</div>}
+			<h3 className="bid-form__title">Place your bid</h3>
+			{error && (
+				<div role="alert" className="bid-form__error">
+					{error}
+				</div>
+			)}
 			<div className="bid-form__field">
 				<label htmlFor="bidder">Your Name</label>
 				<input
@@ -63,16 +77,12 @@ export default function BidForm({ listing, onBidSuccess }: Props) {
 					name="amount"
 					type="number"
 					placeholder={`e.g. ${(listing.currentBid + 1_000).toLocaleString()}`}
-					min={1}
-					step={1}
+					min={listing.currentBid + 0.01}
+					step="0.01"
 					disabled={submitting}
 				/>
 			</div>
-			<button
-				type="submit"
-				className="bid-form__submit"
-				disabled={submitting}
-			>
+			<button type="submit" className="bid-form__submit" disabled={submitting}>
 				{submitting ? "Submitting…" : "Submit Bid"}
 			</button>
 		</form>
