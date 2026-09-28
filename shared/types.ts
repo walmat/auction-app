@@ -13,6 +13,7 @@ export interface Listing {
 	status: Status;
 	endsAt: string;
 	imageUrl: string;
+	imageUrls?: string[];
 }
 
 export interface BidRequest {
@@ -22,6 +23,11 @@ export interface BidRequest {
 
 export interface CreateListingRequest {
 	title: string;
+	description: string;
+	category: Category;
+	startingPrice: number;
+	endsAt: string;
+	photos: string[];
 }
 
 export interface Bid {

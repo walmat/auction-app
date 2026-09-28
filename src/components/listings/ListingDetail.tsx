@@ -12,7 +12,8 @@ interface Props {
 export default function ListingDetail({ listing, onBidSuccess }: Props) {
 	const status = useAuctionStatus(listing);
 	const [failedImage, setFailedImage] = useState<string | null>(null);
-	const imageUrl = listing.imageUrl;
+	const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+	const imageUrl = selectedPhoto ?? listing.imageUrl;
 
 	return (
 		<article className="listing-detail">
@@ -46,6 +47,24 @@ export default function ListingDetail({ listing, onBidSuccess }: Props) {
 							</svg>
 							<span>Photo unavailable</span>
 						</div>
+					)}
+					{listing.imageUrls && listing.imageUrls.length > 1 && (
+						<fieldset
+							className="listing-detail__thumbnails"
+							aria-label="Equipment photos"
+						>
+							{listing.imageUrls.map((photo, index) => (
+								<button
+									key={photo}
+									type="button"
+									aria-label={`View photo ${index + 1}`}
+									aria-pressed={photo === imageUrl}
+									onClick={() => setSelectedPhoto(photo)}
+								>
+									<img src={photo} alt="" />
+								</button>
+							))}
+						</fieldset>
 					)}
 				</div>
 

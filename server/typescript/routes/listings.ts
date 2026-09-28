@@ -1,5 +1,6 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { type Request, type Response, Router } from "express";
+import { validateCreateListing } from "../../../shared/createListing";
 import { parseListingsQuery } from "../../../shared/listings";
 import type { CreateListingRequest, Listing } from "../../../shared/types";
 import { notifyListingsChanged } from "../events";
@@ -8,6 +9,7 @@ import {
 	getListingById,
 	getListings,
 } from "../storage/listings";
+import { removePhotos, savePhotos } from "../storage/photos";
 
 export const listingsRouter = Router();
 
@@ -26,26 +28,36 @@ listingsRouter.get("/", (req: Request, res: Response) => {
 });
 
 listingsRouter.post("/", (req: Request, res: Response) => {
-	const { title }: CreateListingRequest = req.body;
-
-	if (!title || typeof title !== "string" || title.trim() === "") {
-		return res.status(400).json({ error: "Title is required" });
+	const errors = validateCreateListing(req.body);
+	if (Object.keys(errors).length) {
+		return res.status(400).json({ error: Object.values(errors)[0], errors });
 	}
-
-	const listing: Listing = {
-		id: randomUUID(),
-		title: title.trim(),
-		description: "",
-		category: "implement",
-		startingPrice: 0,
-		currentBid: 0,
-		currentBidder: null,
-		status: "active",
-		endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-		imageUrl: "",
-	};
-
-	appendListing(listing);
+	const data = req.body as CreateListingRequest;
+	const id = randomUUID();
+	let listing: Listing;
+	try {
+		const imageUrls = savePhotos(id, data.photos);
+		listing = {
+			id,
+			title: data.title.trim(),
+			description: data.description.trim(),
+			category: data.category,
+			startingPrice: data.startingPrice,
+			currentBid: data.startingPrice,
+			currentBidder: null,
+			status: "active",
+			endsAt: new Date(data.endsAt).toISOString(),
+			imageUrl: imageUrls[0] ?? "",
+			imageUrls,
+		};
+		appendListing(listing);
+	} catch {
+		removePhotos(id);
+		return res.status(500).json({
+			error:
+				"We couldn't publish your listing. Your draft is still available; please try again.",
+		});
+	}
 	notifyListingsChanged();
 
 	return res.status(201).json(listing);
