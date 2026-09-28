@@ -8,9 +8,9 @@ import {
 } from "react-router-dom";
 import { type ListingsQuery, parseListingsQuery } from "../../shared/listings";
 import type { ListingsResponse } from "../../shared/types";
-import ListingCard from "../components/ListingCard";
-import ListingFilters from "../components/ListingFilters";
-import ListingSearch from "../components/ListingSearch";
+import ListingCard from "../components/listings/ListingCard";
+import ListingFilters from "../components/listings/ListingFilters";
+import ListingSearch from "../components/listings/ListingSearch";
 
 export default function ListingsPage() {
 	const { query: loadedQuery, results } = useLoaderData<{ query: ListingsQuery; results: ListingsResponse }>();

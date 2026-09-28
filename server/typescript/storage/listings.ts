@@ -1,13 +1,12 @@
 import { randomUUID } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import type { ListingsQuery } from "../../shared/listings";
-import type { Bid, Listing, ListingsResponse } from "../../shared/types";
+import { dataDirectory } from "./paths";
+import type { ListingsQuery } from "../../../shared/listings";
+import type { Bid, Listing, ListingsResponse } from "../../../shared/types";
 
-const dataDir = join(dirname(fileURLToPath(import.meta.url)), "data");
-const listingsPath = join(dataDir, "listings.json");
-const bidsDir = join(dataDir, "bids");
+const listingsPath = join(dataDirectory, "listings.json");
+const bidsDir = join(dataDirectory, "bids");
 
 const writeJson = (path: string, value: unknown): void => {
 	mkdirSync(dirname(path), { recursive: true });

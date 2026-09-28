@@ -1,7 +1,7 @@
 import type { BidHistoryResponse, BidRequest } from "../../../shared/types";
 import { randomUUID } from "crypto";
 import { Router, type Request, type Response } from "express";
-import { getBids, getListingById, recordBid } from "../store";
+import { getBids, getListingById, recordBid } from "../storage/listings";
 import { NUMERICAL_REGEX } from "../../../shared/regex";
 
 const MAX_LIMIT = 50;

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { createListing } from "../api/listings";
-import type { Listing } from "../../shared/types";
+import { createListing } from "../../api/listings";
+import type { Listing } from "../../../shared/types";
 
 interface Props {
 	onSuccess: (listing: Listing) => void;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { BidHistoryResponse } from "../../shared/types";
-import { getBidHistory } from "../api/listings";
+import type { BidHistoryResponse } from "../../../shared/types";
+import { getBidHistory } from "../../api/listings";
 
 interface Props {
 	listingId: string;

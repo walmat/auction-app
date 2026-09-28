@@ -1,6 +1,6 @@
-import type { Listing } from "../../shared/types";
-import BidForm from "./BidForm";
-import BidHistory from "./BidHistory";
+import type { Listing } from "../../../shared/types";
+import BidForm from "../bids/BidForm";
+import BidHistory from "../bids/BidHistory";
 
 interface Props {
 	listing: Listing;

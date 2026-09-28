@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import type { Listing } from "../../shared/types";
+import type { Listing } from "../../../shared/types";
 
 interface Props {
 	listing: Listing;

@@ -4,7 +4,7 @@ import {
 	categories,
 	type ListingFilters as Filters,
 	statuses,
-} from "../../shared/listings";
+} from "../../../shared/listings";
 
 interface Props {
 	filters: Filters;

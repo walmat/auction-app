@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { placeBid } from "../api/listings";
-import type { Listing } from "../../shared/types";
+import { placeBid } from "../../api/listings";
+import type { Listing } from "../../../shared/types";
 
 interface Props {
 	listing: Listing;

@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { type Request, type Response, Router } from "express";
 import { parseListingsQuery } from "../../../shared/listings";
 import type { CreateListingRequest, Listing } from "../../../shared/types";
-import { appendListing, getListingById, getListings } from "../store";
+import { appendListing, getListingById, getListings } from "../storage/listings";
 
 export const listingsRouter = Router();
 

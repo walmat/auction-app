@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLoaderData, useLocation } from "react-router-dom";
 import type { Listing } from "../../shared/types";
-import ListingDetail from "../components/ListingDetail";
+import ListingDetail from "../components/listings/ListingDetail";
 import { IS_LISTING_ROUTE } from "../../shared/regex";
 
 export function returnToListings(state: unknown): string {
