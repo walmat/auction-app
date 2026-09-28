@@ -1,9 +1,4 @@
-import { useEffect, useRef } from "react";
-import {
-	useLocation,
-	useNavigation,
-	useNavigationType,
-} from "react-router-dom";
+import { useListingSearch } from "../../hooks/useListingSearch";
 
 export default function ListingSearch({
 	value,
@@ -12,65 +7,37 @@ export default function ListingSearch({
 	value: string;
 	onSearch: (value: string) => void;
 }) {
-	const input = useRef<HTMLInputElement>(null);
-	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-	const submitted = useRef(value);
-	const search = useRef(onSearch);
-	search.current = onSearch;
-	const location = useLocation();
-	const navigationType = useNavigationType();
-	const navigation = useNavigation();
-	const previousLocation = useRef(location.key);
-	const destination = navigation.location?.pathname;
-	useEffect(() => {
-		if (destination && destination !== "/listings") clearTimeout(timer.current);
-	}, [destination]);
-
-	useEffect(() => {
-		const wentBack =
-			navigationType === "POP" && previousLocation.current !== location.key;
-		previousLocation.current = location.key;
-		if (wentBack) clearTimeout(timer.current);
-		if (
-			input.current &&
-			(wentBack ||
-				document.activeElement !== input.current ||
-				input.current.value === submitted.current)
-		) {
-			input.current.value = value;
-		}
-	}, [value, location.key, navigationType]);
-	useEffect(() => () => clearTimeout(timer.current), []);
-
-	const submit = (text: string) => {
-		submitted.current = text;
-		search.current(text);
-	};
-
+	const { input, submit, scheduleSearch } = useListingSearch(value, onSearch);
 	return (
 		<search className="listing-search">
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
-					clearTimeout(timer.current);
 					submit(input.current?.value ?? "");
 				}}
 			>
 				<label className="sr-only" htmlFor="lot-search">
 					Search lots by title
 				</label>
+				<svg
+					className="search-icon"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="1.7"
+					aria-hidden="true"
+				>
+					<circle cx="10.5" cy="10.5" r="6.5" />
+					<path d="m16 16 4 4" />
+				</svg>
 				<input
 					ref={input}
 					id="lot-search"
 					type="search"
 					maxLength={200}
 					defaultValue={value}
-					placeholder="Search lots by title…"
-					onChange={(event) => {
-						const text = event.target.value;
-						clearTimeout(timer.current);
-						timer.current = setTimeout(() => submit(text), 300);
-					}}
+					placeholder="Search equipment, makes, models…"
+					onChange={(event) => scheduleSearch(event.target.value)}
 				/>
 			</form>
 		</search>

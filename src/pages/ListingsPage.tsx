@@ -1,19 +1,24 @@
-import { useEffect } from "react";
 import {
-	Link,
 	useLoaderData,
 	useLocation,
 	useNavigate,
 	useNavigation,
 } from "react-router-dom";
-import { type ListingsQuery, parseListingsQuery } from "../../shared/listings";
+import {
+	categories,
+	type ListingsQuery,
+	parseListingsQuery,
+} from "../../shared/listings";
 import type { ListingsResponse } from "../../shared/types";
 import ListingCard from "../components/listings/ListingCard";
 import ListingFilters from "../components/listings/ListingFilters";
-import ListingSearch from "../components/listings/ListingSearch";
+import ListingSort from "../components/listings/ListingSort";
 
 export default function ListingsPage() {
-	const { query: loadedQuery, results } = useLoaderData<{ query: ListingsQuery; results: ListingsResponse }>();
+	const { results } = useLoaderData<{
+		query: ListingsQuery;
+		results: ListingsResponse;
+	}>();
 	const location = useLocation();
 	const navigate = useNavigate();
 	const navigation = useNavigation();
@@ -23,9 +28,6 @@ export default function ListingsPage() {
 			: location.search;
 	const query = parseListingsQuery(new URLSearchParams(pendingSearch));
 	const loading = navigation.state !== "idle";
-	useEffect(() => {
-		document.title = "Auction lots · Interview Auctions";
-	}, []);
 
 	const update = (
 		changes: Record<string, string | string[] | null>,
@@ -55,24 +57,63 @@ export default function ListingsPage() {
 
 	return (
 		<>
+			<title>Auction lots · Interview Auctions</title>
+			<nav className="category-nav" aria-label="Equipment categories">
+				<button
+					type="button"
+					aria-pressed={query.category.length === 0}
+					onClick={() => update({ category: null, page: null })}
+				>
+					All equipment
+				</button>
+				{categories.map((category) => (
+					<button
+						key={category}
+						type="button"
+						aria-pressed={
+							query.category.length === 1 && query.category[0] === category
+						}
+						onClick={() => update({ category, page: null })}
+					>
+						{category === "attachment"
+							? "Attachments"
+							: category === "implement"
+								? "Implements"
+								: category === "combine"
+									? "Combines"
+									: "Tractors"}
+					</button>
+				))}
+			</nav>
 			<div className="page-heading">
 				<div>
-					<h1>Auction lots</h1>
-					<p>Find your next piece of equipment.</p>
+					<h1>Auction listings</h1>
+					<p>Find the right equipment for your next season.</p>
 				</div>
-				<Link
-					className="button button--primary"
-					to="/listings/new"
-					state={{ from: location.pathname + location.search }}
-				>
-					+ New lot
-				</Link>
 			</div>
 			<div className="listing-toolbar">
-				<ListingSearch
-					value={loadedQuery.q}
-					onSearch={(q) => update({ q: q.trim(), page: null }, true)}
-				/>
+				<fieldset className="auction-switch" aria-label="Auction status">
+					{(
+						[
+							{ label: "All auctions", value: null },
+							{ label: "Active", value: "active" },
+							{ label: "Closed", value: "closed" },
+						] as const
+					).map(({ label, value }) => (
+						<button
+							type="button"
+							key={label}
+							aria-pressed={
+								value === null
+									? query.status.length === 0
+									: query.status.length === 1 && query.status[0] === value
+							}
+							onClick={() => update({ status: value, page: null })}
+						>
+							{label}
+						</button>
+					))}
+				</fieldset>
 				<ListingFilters
 					filters={query}
 					onChange={(field, values) => update({ [field]: values, page: null })}
@@ -80,24 +121,12 @@ export default function ListingsPage() {
 						update({ q: null, category: null, status: null, page: null })
 					}
 				/>
-				<label className="select-control listing-sort">
-					Sort by
-					<select
-						value={query.sort}
-						onChange={(event) =>
-							update({ sort: event.target.value, page: null })
-						}
-					>
-						<option value="ending-soonest">Ending soonest</option>
-						<option value="bid-lowest">Current bid: low to high</option>
-						<option value="bid-highest">Current bid: high to low</option>
-					</select>
-				</label>
+				<ListingSort
+					value={query.sort}
+					onChange={(sort) => update({ sort, page: null })}
+				/>
 			</div>
 
-			<div className="results-heading" role="status">
-				{results.total} matching {results.total === 1 ? "lot" : "lots"}
-			</div>
 			<div aria-busy={loading} inert={loading} className="results">
 				{results.listings.length > 0 ? (
 					<div className="listing-grid">

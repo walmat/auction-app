@@ -13,7 +13,7 @@ export default function ListingPage() {
 	const location = useLocation();
 	const { revalidate } = useRevalidator();
 	return (
-		<div className="detail-page">
+		<div className="detail-page detail-page--listing">
 			<title>{listing.title} · Interview Auctions</title>
 			<Link className="back-link" to={returnToListings(location.state)}>
 				← Back to lots
