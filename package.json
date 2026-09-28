@@ -9,7 +9,11 @@
 		"preview": "vite preview",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"test": "npm run test:api && npm run test:browser",
+		"test:api": "npm test --prefix server/typescript",
+		"test:browser": "playwright test",
+		"typecheck": "tsc -b && tsc --noEmit -p server/typescript/tsconfig.json && tsc -p tsconfig.tests.json"
 	},
 	"dependencies": {
 		"@radix-ui/react-popover": "^1.1.23",
@@ -20,6 +24,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.6",
+		"@playwright/test": "^1.63.0",
+		"@types/node": "^22.20.4",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.1",

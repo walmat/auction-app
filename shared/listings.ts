@@ -1,5 +1,5 @@
-import type { Category, Status } from "./types";
 import { NUMERICAL_REGEX } from "./regex";
+import type { Category, Status } from "./types";
 
 export const categories: Category[] = [
 	"tractor",

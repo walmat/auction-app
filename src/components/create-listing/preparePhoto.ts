@@ -1,4 +1,5 @@
 import { MAX_PHOTO_BYTES } from "../../../shared/createListing";
+
 export async function preparePhoto(file: File): Promise<string> {
 	if (
 		!["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
